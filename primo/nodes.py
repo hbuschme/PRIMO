@@ -41,6 +41,10 @@ class Node(object):
         self.name = name.replace(" ", "_")
         # for visual illustration
         self.pos = (0, 0)
+        self.parents = []
+        
+    def get_parents(self):
+        return self.parents
 
     def __str__(self):
         return self.name
@@ -73,6 +77,7 @@ class RandomNode(Node):
         Adjust the cpd so a new node is incorporated as dependency.
         '''
         self.cpd.add_variable(node)
+        self.parents.append(node)
 
     def get_cpd_reduced(self, evidence):
         '''
@@ -82,6 +87,9 @@ class RandomNode(Node):
         '''
         return self.cpd.reduction(evidence)
 
+    def set_evidence(self, evidence):
+        return self.cpd.set_evidence(evidence)
+        
     def get_value_range(self):
         return self.value_range
 
@@ -156,7 +164,9 @@ class DiscreteNode(RandomNode):
                     compatibles.append(v)
         return random.choice(compatibles), 1.0
 
-
+    def __str__(self):
+        return self.name +"\n"+ str(self.cpd)
+    
 class ContinuousNode(RandomNode):
     '''
     Represents a random-variable with a real-valued domain. Can only be defined
@@ -346,7 +356,13 @@ class DecisionNode(Node):
         super(DecisionNode, self).__init__(name)
         self.value_range = value_range
         self.state = None
+        self.parents = []
+        self.decisiontable = primo.inference.decision.DecisionTable()
+        self.decisiontable.add_variable(self)
 
+    def __repr__(self):
+        return "DecisionNode("+self.name+")"
+    
     def get_value_range(self):
         """returns a list of actions"""
         return self.value_range
@@ -361,7 +377,21 @@ class DecisionNode(Node):
         self.value_range = value_range
 
     def announce_parent(self, node):
-        pass
+        self.decisiontable.add_variable(node)
+        self.parents.append(node)
+        
+    def get_parents(self):
+        return self.parents
+
+    def set_rule(self, value, assignment):
+        """
+        Sets one rule in the decision table of this node
+
+        keyword arguments:
+        value -- the rule value can be 0.0 or 1.0
+        assignment -- a list of assignments of node value pairs
+        """
+        self.decisiontable.set_rule(value, assignment)
 
     def set_state(self, decision):
         """
@@ -374,16 +404,19 @@ class DecisionNode(Node):
         if decision in self.value_range:
             self.state = decision
         else:
-            raise Exception("Could not set the state, given decision is not in value range")
+            raise Exception("Could not set the state: "+decision+" ,given decision is not in value range of Node: "+self.name)
 
     def get_state(self):
         """
         Getter for the state
         """
         return self.state
+    
+    def get_decision_table(self):
+        return self.decisiontable
 
     def __str__(self):
-        return self.name + "\n" + str(self.value_range) + "\n" + str(self.state)
+        return self.name + "\t" + str(self.value_range) + "\t" + str(self.state)
 
 
 class UtilityNode(Node):
@@ -400,6 +433,9 @@ class UtilityNode(Node):
         super(UtilityNode, self).__init__(name)
         self.ut = primo.inference.decision.UtilityTable()
 
+    def __repr__(self):
+        return "UtilityNode("+self.name+")"
+    
     def announce_parent(self, node):
         """
         Gets called automatically when this node gets a new parent
@@ -409,6 +445,7 @@ class UtilityNode(Node):
         node -- the parent node of this utility node
         """
         self.ut.add_variable(node)
+        self.parents.append(node)
 
     def set_utility_table(self, table, nodes):
         """

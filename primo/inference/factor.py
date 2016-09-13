@@ -188,14 +188,18 @@ class FactorTreeFactory(object):
         self.calculate_clusters(rootFactor,graph,set())
         return FactorTree(graph,rootFactor)
 
-    def create_greedy_factortree(self, bayesNet):
+    def create_greedy_factortree(self, bayesNet, all_nodes=None):
         '''This method creates a factor the after the following algorithm:
 
             1. Sort factors after containing variables (descending).
             2. For each node in the sorted list insert at it's best position.
 
             The best position is the node with the most joint variables.'''
-        allNodes = bayesNet.get_all_nodes()
+        if(not all_nodes):
+            allNodes = bayesNet.get_all_nodes()
+        else:
+            allNodes = all_nodes
+            
         if len(allNodes) == 0:
             raise Exception("createRandomFactorTree: No nodes in given BayesNet")
         sortNodeList = []
@@ -286,22 +290,30 @@ class EasiestFactorElimination(object):
         self.bn = bayesNet
 
 
-    def calculate_PriorMarginal(self, variables):
+    def calculate_PriorMarginal(self, variables, all_nodes=None):
         '''Calculate the prior marignal for the given variables. 
         Return the resulting CPD.'''
-        nodes = self.bn.get_all_nodes()
+        if(not all_nodes):
+            nodes = self.bn.get_all_nodes()
+        else:
+            nodes = all_nodes
+            
         finCpd = nodes.pop().get_cpd()
         for n in nodes:
             finCpd = finCpd.multiplication(n.get_cpd())
+        #print("jCPT: "+ str(finCpd))
         for v in finCpd.get_variables():
             if v not in variables:
                 finCpd = finCpd.marginalization(v)
         return finCpd
 
-    def calculate_PosteriorMarginal(self,variables,evidence):
+    def calculate_PosteriorMarginal(self,variables,evidence,all_nodes=None):
         '''Calculate the posterior marginal for given variables and evidence.
         Return the resulting CPD.'''
-        nodes = self.bn.get_all_nodes()
+        if(not all_nodes):
+            nodes = self.bn.get_all_nodes()
+        else:
+            nodes = all_nodes
         #List of evidences
         ev_list = zip(*evidence)
         # Special Case: First Node
@@ -321,6 +333,7 @@ class EasiestFactorElimination(object):
             else:
                 #only multiply
                 finCpd = finCpd.multiplication(n.get_cpd())
+        #print("jCPT: "+ str(finCpd))
         for v in finCpd.get_variables():
             if v not in variables:
                 finCpd = finCpd.marginalization(v)
@@ -348,4 +361,74 @@ class EasiestFactorElimination(object):
             finCpd = finCpd.marginalization(v)
         return finCpd
 
+    def calculate_PosteriorMarginal_DN(self, nodes, uts, variables, evidence):
+        '''Calculate the posterior marginal for given variables and evidence.
+        Return the resulting CPD.'''
 
+        print "nodes: " + str(nodes)
+        print "variables: " +str(variables)
+        print "ev: " +str(evidence)
+        #List of evidences
+        if evidence:
+            ev_list = zip(*evidence)
+        # Special Case: First Node
+        node1 = nodes.pop()
+        if evidence:
+            if node1 in ev_list[0]:
+                ind = ev_list[0].index(node1)
+                finCpd = node1.get_cpd().set_evidence(evidence[ind])
+                #print "reduced " + str(node1)
+            else:
+                finCpd = node1.get_cpd()
+        else:
+            finCpd = node1.get_cpd()
+        # For all other nodes
+        for n in nodes:
+            if evidence:
+                if n in ev_list[0]:
+                    #Set evidence and multiply
+                    ind = ev_list[0].index(n)
+                    nCPD = n.get_cpd().set_evidence(evidence[ind])
+                    #print "reduced " + str(n)
+                    finCpd = finCpd.multiplication(nCPD)
+                else:
+                    #only multiply
+                    finCpd = finCpd.multiplication(n.get_cpd())
+            else:  
+                finCpd = finCpd.multiplication(n.get_cpd())
+                
+        #append node1 to list, because we work on the originallist of the net and
+        #dont want to change it by removing the node1
+        nodes.append(node1)
+        
+        
+        #finCpd = finCpd.normalize_as_jpt()
+#        print("jCPT: "+ str(finCpd))
+#        print finCpd.variables
+        
+        
+        '''     UT-Nodes
+        For single Ut node in net, just multiply it in.
+        For more than one Ut node, build large Ut factor of all Uts before multiplying.'''
+
+        if len(uts) == 1:
+            finCpd = finCpd.multiplication(uts[0].get_utility_table())
+        else:
+            ut = uts.pop().get_utility_table()
+            for u in uts:
+                ut = ut.summation(u.get_utility_table())
+            finCpd = finCpd.multiplication(ut)
+            
+       
+        #print("jCPT: "+ str(finCpd))
+        
+        
+        for v in finCpd.get_variables():
+            if v not in variables:
+                finCpd = finCpd.marginalization(v)
+        
+        print "ut factor"
+        print("jCPT: "+ str(finCpd))
+        print finCpd.variables
+        
+        return finCpd

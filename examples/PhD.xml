@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <BIF VERSION="0.3" xmlns="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3 http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3/XMLBIFv0_3.xsd">
+        <NETWORK>
+            <NAME>PhD</NAME>
+            <VARIABLE TYPE="nature">
+                <NAME>prize</NAME>
+                <OUTCOME>prize</OUTCOME>
+                <OUTCOME>no prize</OUTCOME>
+                <PROPERTY>position = (150, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="decision">
+                <NAME>startUp</NAME>
+                <OUTCOME>do startUp</OUTCOME>
+                <OUTCOME>no startUp</OUTCOME>
+                <PROPERTY>position = (300, 300)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="utility">
+                <NAME>benefit</NAME>
+                <PROPERTY>position = (300, 400)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="utility">
+                <NAME>cost</NAME>
+                <PROPERTY>position = (300, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="utility">
+                <NAME>costStartup</NAME>
+                <PROPERTY>position = (150, 400)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="nature">
+                <NAME>income</NAME>
+                <OUTCOME>low</OUTCOME>
+                <OUTCOME>average</OUTCOME>
+                <OUTCOME>high</OUTCOME>
+                <PROPERTY>position = (150, 300)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="decision">
+                <NAME>education</NAME>
+                <OUTCOME>do Phd</OUTCOME>
+                <OUTCOME>no Phd</OUTCOME>
+                <PROPERTY>position = (150, 100)</PROPERTY>
+            </VARIABLE>
+            <DEFINITION>
+                <FOR>prize</FOR>
+                <GIVEN>education</GIVEN>
+                <TABLE>0.001 0.999 1e-07 0.9999999 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>startUp</FOR>
+                <GIVEN>prize</GIVEN>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>benefit</FOR>
+                <GIVEN>income</GIVEN>
+                <TABLE>100000 200000 500000 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>cost</FOR>
+                <GIVEN>education</GIVEN>
+                <TABLE>-50000 0 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>costStartup</FOR>
+                <GIVEN>startUp</GIVEN>
+                <TABLE>-20000 0 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>income</FOR>
+                <GIVEN>prize</GIVEN>
+                <GIVEN>startUp</GIVEN>
+                <TABLE>0.005 0.005 0.99 0.005 0.015 0.8 0.1 0.5 0.4 0.2 0.6 0.2 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>education</FOR>
+            </DEFINITION>
+        </NETWORK>
+    </BIF>

@@ -450,7 +450,7 @@ class ProbabilityTable(Density):
 
         #this is the old code:
         #return self.table * 1.0 / numpy.sum(self.table)
-
+    
     def multiplication(self, inputFactor):
         '''This method returns a unified ProbabilityTable which contains the variables of both; the inputFactor
             and this factor(self). The new values of the returned factor is the product of the values from the input factors
@@ -497,13 +497,14 @@ class ProbabilityTable(Density):
                 factor2.variables.insert(endDim,factor2.variables.pop(startDim))
 
         #pointwise multiplication
+        #print "shape1: " +str(factor1.table.shape) +" shape2: " + str(factor2.table.shape)
         if factor1.table.shape != factor2.table.shape:
             raise Exception("Multiplication: The probability tables have the wrong dimensions for unification!")
 
         factor1.table = factor1.table *factor2.table;
 
         return factor1
-
+        
 
     def marginalization(self, variable):
         '''This method returns a new instantiation with the given variable summed out.'''
@@ -539,6 +540,9 @@ class ProbabilityTable(Density):
             reduced.table=reduced.table.squeeze()
             reduced.variables.remove(node)
 
+#        print("Table before: " + str(self.table))
+#        print("Table after: " + str(reduced))
+        
         return reduced
 
     def set_evidence(self,evidence):
@@ -549,7 +553,7 @@ class ProbabilityTable(Density):
         ev.variables = copy.copy(self.variables)
         ev.table = numpy.zeros(self.table.shape)
         tmpCpd = self.table
-
+        
         pos_variable = ev.variables.index(evidence[0])
         pos_value = ev.variables[pos_variable].value_range.index(evidence[1])
 
@@ -558,7 +562,9 @@ class ProbabilityTable(Density):
         ev.variables.insert(0,ev.variables.pop(pos_variable))
 
         ev.table[pos_value] = tmpCpd[pos_value]
-
+        
+        #print("Table before: " + str(self.table))
+        #print("Table after: " + str(ev))
         return ev
 
     def copy(self):
@@ -570,7 +576,59 @@ class ProbabilityTable(Density):
 
         return ev
 
+    def summation(self, inputFactor):
+        '''This method returns a unified ProbabilityTable which contains the variables of both; the inputFactor
+            and this factor(self). The new values of the returned factor is the product of the values from the input factors
+            which are compatible to the variable instantiation of the returned value.'''
+        #init a new probability tabel
+        factor1 = ProbabilityTable()
 
+        #all variables from both factors are needed
+        factor1.variables = copy.copy(self.variables)
+
+        for v in (inputFactor.variables):
+            if not v in factor1.variables:
+                factor1.variables.append(v)
+
+            #the table from the first factor is copied
+            factor1.table = copy.copy(self.table)
+
+        #and extended by the dimensions for the left variables
+        for curIdx in range(factor1.table.ndim, len(factor1.variables)):
+            ax = factor1.table.ndim
+            factor1.table=numpy.expand_dims(factor1.table,ax)
+            factor1.table=numpy.repeat(factor1.table,len(factor1.variables[curIdx].value_range),axis = ax)
+
+        #copy factor 2 and it's variables ...
+        factor2 = ProbabilityTable()
+        factor2.variables = copy.copy(inputFactor.variables)
+        factor2.table = copy.copy(inputFactor.table)
+
+        #extend the dimensions of factors 2 to the dimensions of factor 1
+        for v in factor1.variables:
+            if not v in factor2.variables:
+                factor2.variables.append(v)
+
+        for curIdx in range(factor2.table.ndim, len(factor2.variables)):
+            ax = factor2.table.ndim
+            factor2.table=numpy.expand_dims(factor2.table,ax)
+            factor2.table=numpy.repeat(factor2.table,len(factor2.variables[curIdx].value_range),axis = ax)
+
+        #sort the variables to the same order
+        for endDim,variable in enumerate(factor1.variables):
+            startDim = factor2.variables.index(variable);
+            if not startDim == endDim:
+                factor2.table = numpy.rollaxis(factor2.table, startDim, endDim)
+                factor2.variables.insert(endDim,factor2.variables.pop(startDim))
+
+        #pointwise addition
+        #print "shape1: " +str(factor1.table.shape) +" shape2: " + str(factor2.table.shape)
+        if factor1.table.shape != factor2.table.shape:
+            raise Exception("Multiplication: The probability tables have the wrong dimensions for unification!")
+
+        factor1.table = factor1.table + factor2.table;
+
+        return factor1
 
     def division(self, factor):
         '''Returns a new ProbabilityTable which is the result of dividing this one by the one given

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <BIF VERSION="0.3" xmlns="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3 http://www.cs.ubc.ca/labs/lci/fopi/ve/XMLBIFv0_3/XMLBIFv0_3.xsd">
+        <NETWORK>
+            <NAME>test</NAME>
+            <VARIABLE TYPE="nature">
+                <NAME>f0</NAME>
+                <OUTCOME>shrinking</OUTCOME>
+                <OUTCOME>growing</OUTCOME>
+                <PROPERTY>position = (150, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="nature">
+                <NAME>s_t</NAME>
+                <OUTCOME>huge</OUTCOME>
+                <OUTCOME>med</OUTCOME>
+                <OUTCOME>low</OUTCOME>
+                <PROPERTY>position = (600, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="utility">
+                <NAME>g0</NAME>
+                <PROPERTY>position = (450, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="utility">
+                <NAME>g_t</NAME>
+                <PROPERTY>position = (300, 200)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="nature">
+                <NAME>s0</NAME>
+                <OUTCOME>huge</OUTCOME>
+                <OUTCOME>med</OUTCOME>
+                <OUTCOME>low</OUTCOME>
+                <PROPERTY>position = (450, 100)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="decision">
+                <NAME>d_t</NAME>
+                <OUTCOME>goFishing</OUTCOME>
+                <OUTCOME>noFishing</OUTCOME>
+                <PROPERTY>position = (300, 100)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="nature">
+                <NAME>f_t</NAME>
+                <OUTCOME>shrinking</OUTCOME>
+                <OUTCOME>growing</OUTCOME>
+                <PROPERTY>position = (150, 300)</PROPERTY>
+            </VARIABLE>
+            <VARIABLE TYPE="decision">
+                <NAME>d0</NAME>
+                <OUTCOME>goFishing</OUTCOME>
+                <OUTCOME>noFishing</OUTCOME>
+                <PROPERTY>position = (150, 100)</PROPERTY>
+            </VARIABLE>
+            <DEFINITION>
+                <FOR>f0</FOR>
+                <TABLE>1.0 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>s_t</FOR>
+                <GIVEN>s0</GIVEN>
+                <GIVEN>d0</GIVEN>
+                <TABLE>0.1 0.4 0.5 0.6 0.3 0.1 0.1 0.2 0.7 0.3 0.6 0.1 0.1 0.1 0.8 0.1 0.5 0.4 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>g0</FOR>
+                <GIVEN>d0</GIVEN>
+                <GIVEN>s0</GIVEN>
+                <TABLE>1000 500 100 0 0 0 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>g_t</FOR>
+                <GIVEN>d_t</GIVEN>
+                <GIVEN>s_t</GIVEN>
+                <TABLE>1000 500 100 0 0 0 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>s0</FOR>
+                <TABLE>0.225919695848 0.240803041517 0.533277262635 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>d_t</FOR>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>f_t</FOR>
+                <GIVEN>s_t</GIVEN>
+                <TABLE>0.1 0.9 0.5 0.5 0.7 0.3 </TABLE>
+            </DEFINITION>
+            <DEFINITION>
+                <FOR>d0</FOR>
+            </DEFINITION>
+        </NETWORK>
+    </BIF>

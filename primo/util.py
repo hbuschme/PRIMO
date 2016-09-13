@@ -20,6 +20,7 @@
 # <http://www.gnu.org/licenses/>.
 
 import random
+import primo.nodes
 
 def weighted_random(weights):
     '''
@@ -32,3 +33,81 @@ def weighted_random(weights):
         counter -= w
         if counter <= 0:
             return i
+        
+def s_reachable(D1, D2, net):
+    '''
+    D1 sreachable from D2
+    '''
+    #print "\n"+str(D1.name)+" sreachable from "+str(D2.name)
+    D_dach = primo.nodes.DecisionNode("D_dach", ["x","y"])
+    #add dummy decisionnode
+    net.graph.add_node(D_dach)
+    net.graph.add_edge(D_dach, D1)
+
+    familiy =  net.graph.predecessors(D2) + [D2] 
+    
+    r = nodes_reachable_from(D_dach, familiy , net)
+    
+    
+    #print "R: " + str(r)
+    #print "U_d: " +str(net.get_utNodes_relevant_to_decNode(D2))
+    
+    
+    for item in net.get_utNodes_relevant_to_decNode(D2):
+        if item in r:
+            return True
+    
+
+        
+def nodes_reachable_from(X, Z, net):
+    '''
+    Algorithm for finding nodes reachable from X given Z via active trails Probabilistic
+    Grahical Models p.75
+    
+    X Source Variable
+    Z List of Observations (just List with Nodes)
+    returns the set of all nodes reachable from X via active trails
+    '''
+    
+    #Phase I
+    L = Z
+    A = []
+    #print "Z: " +str(Z)
+    #print "L: "+str(L)
+    while L:
+        y = L.pop()
+        if not y in A:
+            L = list(set(L).union(net.graph.predecessors(y))) 
+        A = list(set(A).union([y]))
+    
+               
+    #print "A: "+str(A)
+    
+    #Phase II
+    L = [(X, "up")] #(Node,direction) to be visited
+    V = [] #(Node,direction) marked as visited
+    R = []
+    
+    while L:
+        #print "L: " +str(L)
+        y = L.pop()
+        if not y in V:
+            if not y[0] in Z:
+                R = list(set(R).union([y[0]]))  #y is reachable
+            V = list(set(V).union([y])) 
+            if y[1] == "up" and not y[0] in Z:
+                for z in net.graph.predecessors(y[0]):
+                    L = list(set().union(L, [(z,"up")]))
+                for z in net.graph.successors(y[0]):
+                    L = list(set().union(L, [(z,"down")]))
+            elif y[1] == "down":
+                if not y[0] in Z:
+                    for z in net.graph.successors(y[0]):
+                       L = list(set().union(L, [(z,"down")]))
+                if y[0] in A:
+                    for z in net.graph.predecessors(y[0]):
+                        L = list(set().union(L, [(z,"up")]))
+    
+    return R
+                
+                
